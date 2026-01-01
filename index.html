@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For Miss Nancy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,600&display=swap');
+        
+        body {
+            font-family: 'Playfair Display', serif;
+            overflow-x: hidden;
+        }
+
+        .blur-text-word {
+            display: inline-block;
+            filter: blur(10px);
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .sparkle {
+            position: absolute;
+            pointer-events: none;
+            animation: twinkle var(--duration) ease-in-out infinite;
+            animation-delay: var(--delay);
+        }
+
+        @keyframes twinkle {
+            0%, 100% { transform: scale(0) rotate(0deg); opacity: 0; }
+            50% { transform: scale(1) rotate(180deg); opacity: 1; }
+        }
+
+        .click-spark {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            animation: spark-burst 0.4s ease-out forwards;
+        }
+
+        @keyframes spark-burst {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            200: '#fecdd3',
+                            300: '#fda4af',
+                            400: '#fb7185',
+                            800: '#9f1239',
+                            900: '#881337',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-rose-50 via-white to-orange-50 flex flex-col relative">
+
+    <!-- Header -->
+    <header class="w-full py-6 px-4 text-center z-10">
+        <h1 class="text-rose-900/50 text-sm tracking-[0.3em] uppercase font-medium">For You</h1>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow container mx-auto px-4 flex items-center justify-center z-10 relative">
+        <div class="flex flex-col items-center justify-center p-6 max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-2xl shadow-xl border border-rose-100 mt-10 mb-10 relative overflow-hidden" id="card">
+            
+            <!-- Continuous Sparkles Container -->
+            <div id="sparkles-container" class="absolute inset-0 pointer-events-none z-0"></div>
+
+            <!-- Tag -->
+            <div class="absolute top-6 right-6 z-20 opacity-0" id="tag">
+                <span class="bg-rose-100 text-rose-800 text-xs italic px-3 py-1 rounded-full border border-rose-200 shadow-sm">
+                    To Miss Nancy
+                </span>
+            </div>
+
+            <!-- Image -->
+            <div class="relative w-full aspect-[4/5] md:aspect-square overflow-hidden rounded-xl shadow-lg mb-8 z-10 opacity-0" id="rose-image-container">
+                <img 
+                    src="images/juliet-rose.webp" 
+                    alt="A beautiful bouquet of Juliet Roses" 
+                    class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-700 ease-in-out"
+                />
+            </div>
+            
+            <!-- Note -->
+            <div class="text-center space-y-4 p-4 z-10 relative">
+                <p class="text-xl md:text-2xl text-rose-900 italic leading-relaxed" id="note">
+                    This is the Juliet Rose—one of the rarest and most breathtaking roses ever grown, admired for its soft petals, warm glow, and quiet elegance. It doesn’t shout for attention; its beauty speaks gently, yet stays unforgettable. In so many ways, it reflects you—rare, graceful, and effortlessly captivating.
+                    <br><br>
+                    I hope this puts a gorgeous smile on your face, miss, the kind that lingers and brightens everything around you. May your day unfold with ease, warmth, and little moments that remind you just how special you are. Have a truly wonderful day, filled with beauty that finds you in the simplest ways 🌹✨
+                </p>
+                
+                <div class="mt-4 text-rose-400 opacity-0" id="heart-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 mx-auto animate-pulse" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    </main>
+
+    <!-- Background Music -->
+    <audio id="bg-music" src="audio/Kashia - Beloved (freetouse.com).mp3" loop autoplay></audio>
+
+    <script>
+      const music = document.getElementById('bg-music');
+      // If autoplay is blocked, play music on first click
+      document.addEventListener('click', () => {
+        if (music.paused) music.play();
+      });
+    </script>
+ 
+    <!-- Footer -->
+    <footer class="w-full py-6 text-center text-rose-900/30 text-xs z-10">
+        <p>&copy; <script>document.write(new Date().getFullYear())</script> Made with ❤️</p>
+    </footer>
+
+    <script>
+        // --- Continuous Sparkles ---
+        function createSparkle() {
+            const container = document.getElementById('sparkles-container');
+            const sparkle = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            sparkle.setAttribute("viewBox", "0 0 160 160");
+            sparkle.setAttribute("class", "sparkle");
+            sparkle.style.width = Math.random() * 15 + 10 + 'px';
+            sparkle.style.height = sparkle.style.width;
+            sparkle.style.left = Math.random() * 100 + '%';
+            sparkle.style.top = Math.random() * 100 + '%';
+            sparkle.style.setProperty('--duration', Math.random() * 1 + 1 + 's');
+            sparkle.style.setProperty('--delay', Math.random() * 2 + 's');
+            
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", "M80 0C80 0 84.2846 41.2925 101.496 58.504C118.707 75.7154 160 80 160 80C160 80 118.707 84.2846 101.496 101.496C84.2846 118.707 80 160 80 160C80 160 75.7154 118.707 58.504 101.496C41.2925 84.2846 0 80 0 80C0 80 41.2925 75.7154 58.504 58.504C75.7154 41.2925 80 0 80 0Z");
+            path.setAttribute("fill", "#FFD700");
+            
+            sparkle.appendChild(path);
+            container.appendChild(sparkle);
+        }
+
+        for(let i=0; i<30; i++) {
+            createSparkle();
+        }
+
+        // --- Click Sparkles ---
+        document.addEventListener('click', (e) => {
+            const count = 12;
+            const color = '#FFD700';
+            
+            for (let i = 0; i < count; i++) {
+                const spark = document.createElement('div');
+                spark.classList.add('click-spark');
+                spark.style.left = e.pageX + 'px';
+                spark.style.top = e.pageY + 'px';
+                spark.style.backgroundColor = color;
+                spark.style.width = Math.random() * 6 + 4 + 'px';
+                spark.style.height = spark.style.width;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 60 + 20;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                spark.style.setProperty('--tx', tx + 'px');
+                spark.style.setProperty('--ty', ty + 'px');
+                
+                document.body.appendChild(spark);
+                
+                setTimeout(() => {
+                    spark.remove();
+                }, 400);
+            }
+        });
+
+        // --- Animations with GSAP ---
+        window.addEventListener('load', () => {
+            // Fade in Image
+            gsap.to("#rose-image-container", {
+                opacity: 1,
+                duration: 1.5,
+                ease: "power2.out"
+            });
+
+            // Fade in Tag
+            gsap.to("#tag", {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                delay: 0.5,
+                ease: "power2.out"
+            });
+
+            // Blur Text Reveal
+            const note = document.getElementById('note');
+            const text = note.innerHTML;
+            // Simple word split (preserving HTML tags roughly, but for this simple text it's fine)
+            // Actually, let's just split by spaces for the effect
+            const words = note.innerText.split(' ');
+            note.innerHTML = words.map(word => `<span class="blur-text-word">${word}&nbsp;</span>`).join('');
+            
+            gsap.to(".blur-text-word", {
+                filter: "blur(0px)",
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                stagger: 0.02,
+                delay: 0.5,
+                ease: "power2.out"
+            });
+
+            // Heart Icon
+            gsap.to("#heart-icon", {
+                opacity: 1,
+                duration: 1,
+                delay: 2
+            });
+        });
+    </script>
+</body>
+</html>
